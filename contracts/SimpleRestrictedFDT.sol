@@ -1132,7 +1132,7 @@ contract FundsDistributionToken is IFundsDistributionToken, ERC20Detailed, ERC20
 	}
 }
 
-contract SimpleRestrictedFDT is IFundsDistributionToken, FundsDistributionToken, ERC1404, Whitelistable, Restrictable {
+contract SimpleRestrictedFDT is FundsDistributionToken, ERC1404, Whitelistable, Restrictable {
 
 	using SafeMathUint for uint256;
 	using SafeMathInt for int256;
