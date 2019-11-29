@@ -1138,11 +1138,11 @@ contract SimpleRestrictedFDT is FundsDistributionToken, ERC1404, Whitelistable, 
 	using SafeMathInt for int256;
 	
 	// ERC1404 Error codes and messages
-  uint8 public constant SUCCESS_CODE = 0;
-  uint8 public constant FAILURE_NON_WHITELIST = 1;
-  string public constant SUCCESS_MESSAGE = "SUCCESS";
-  string public constant FAILURE_NON_WHITELIST_MESSAGE = "The transfer was restricted due to white list configuration.";
-  string public constant UNKNOWN_ERROR = "Unknown Error Code";
+  	uint8 public constant SUCCESS_CODE = 0;
+  	uint8 public constant FAILURE_NON_WHITELIST = 1;
+  	string public constant SUCCESS_MESSAGE = "SUCCESS";
+  	string public constant FAILURE_NON_WHITELIST_MESSAGE = "The transfer was restricted due to white list configuration.";
+  	string public constant UNKNOWN_ERROR = "Unknown Error Code";
 
 	// token in which the funds can be sent to the FundsDistributionToken
 	IERC20 public fundsToken;
@@ -1156,117 +1156,117 @@ contract SimpleRestrictedFDT is FundsDistributionToken, ERC1404, Whitelistable, 
 	}
 
 	constructor(
-		  string memory name, 
-		  string memory symbol,
-		  IERC20 _fundsToken,
-      address owner,
-      uint256 initialAmount
+		string memory name, 
+		string memory symbol,
+		IERC20 _fundsToken,
+                address owner,
+                uint256 initialAmount
 	) 
-		  public 
-		  FundsDistributionToken(name, symbol)
+		public 
+		FundsDistributionToken(name, symbol)
 	{
-		  require(address(_fundsToken) != address(0), "SimpleRestrictedFDT: INVALID_FUNDS_TOKEN_ADDRESS");
+		require(address(_fundsToken) != address(0), "SimpleRestrictedFDT: INVALID_FUNDS_TOKEN_ADDRESS");
 
-		  fundsToken = _fundsToken;
-      _addMinter(owner);
-      _transferOwnership(owner);
-      _mint(owner, initialAmount);
+		fundsToken = _fundsToken;
+      		_addMinter(owner);
+      		_transferOwnership(owner);
+      		_mint(owner, initialAmount);
 	}
 
-  /**
-  This function detects whether a transfer should be restricted and not allowed.
-  If the function returns SUCCESS_CODE (0) then it should be allowed.
-  */
-  function detectTransferRestriction (address from, address to, uint256)
-      public
-      view
-      returns (uint8)
-    {               
-      // If the restrictions have been disabled by the owner, then just return success
-      // Logic defined in Restrictable parent class
-      if(!isRestrictionEnabled()) {
-       return SUCCESS_CODE;
-      }
+  	/**
+  	This function detects whether a transfer should be restricted and not allowed.
+  	If the function returns SUCCESS_CODE (0) then it should be allowed.
+  	*/
+  	function detectTransferRestriction (address from, address to, uint256)
+      		public
+      		view
+      		returns (uint8)
+    	{               
+      		// If the restrictions have been disabled by the owner, then just return success
+      		// Logic defined in Restrictable parent class
+      		if(!isRestrictionEnabled()) {
+       		return SUCCESS_CODE;
+      		}
 
-      // If the contract owner is transferring, then ignore reistrictions        
-      if(from == owner()) {
-        return SUCCESS_CODE;
-      }
+      		// If the contract owner is transferring, then ignore reistrictions        
+      		if(from == owner()) {
+        	return SUCCESS_CODE;
+      		}
 
-      // Restrictions are enabled, so verify the whitelist config allows the transfer.
-      // Logic defined in Whitelistable parent class
-      if(!checkWhitelistAllowed(from, to)) {
-         return FAILURE_NON_WHITELIST;
-      }
+      		// Restrictions are enabled, so verify the whitelist config allows the transfer.
+      		// Logic defined in Whitelistable parent class
+      		if(!checkWhitelistAllowed(from, to)) {
+        	return FAILURE_NON_WHITELIST;
+      		}
 
-      // If no restrictions were triggered return success
-      return SUCCESS_CODE;
-  }
+      		// If no restrictions were triggered return success
+      		return SUCCESS_CODE;
+  	}
     
-  /**
-  This function allows a wallet or other client to get a human readable string to show
-  a user if a transfer was restricted.  It should return enough information for the user
-  to know why it failed.
-  */
-  function messageForTransferRestriction (uint8 restrictionCode)
-      public
-      view
-      returns (string memory)
-    {
-      if (restrictionCode == SUCCESS_CODE) {
-      return SUCCESS_MESSAGE;
-      }
+  	/**
+  	This function allows a wallet or other client to get a human readable string to show
+  	a user if a transfer was restricted.  It should return enough information for the user
+  	to know why it failed.
+  	*/
+  	function messageForTransferRestriction (uint8 restrictionCode)
+      		public
+      		view
+      		returns (string memory)
+    	{
+      		if (restrictionCode == SUCCESS_CODE) {
+      		return SUCCESS_MESSAGE;
+      		}
 
-      if (restrictionCode == FAILURE_NON_WHITELIST) {
-      return FAILURE_NON_WHITELIST_MESSAGE;
-      }
+      		if (restrictionCode == FAILURE_NON_WHITELIST) {
+      		return FAILURE_NON_WHITELIST_MESSAGE;
+      		}
 
-      // An unknown error code was passed in.
-      return UNKNOWN_ERROR;
-  }
+      		// An unknown error code was passed in.
+      		return UNKNOWN_ERROR;
+  	}
 
-  /**
-  Evaluates whether a transfer should be allowed or not.
-  */
-  modifier notRestricted (address from, address to, uint256 value) {        
-      uint8 restrictionCode = detectTransferRestriction(from, to, value);
-      require(restrictionCode == SUCCESS_CODE, messageForTransferRestriction(restrictionCode));
-      _;
-  }
+  	/**
+  	Evaluates whether a transfer should be allowed or not.
+  	*/
+  	modifier notRestricted (address from, address to, uint256 value) {        
+      		uint8 restrictionCode = detectTransferRestriction(from, to, value);
+      		require(restrictionCode == SUCCESS_CODE, messageForTransferRestriction(restrictionCode));
+      		_;
+  	}
 
-  /**
-  Overrides the parent class token transfer function to enforce restrictions.
-  */
-  function transfer (address to, uint256 value)
-      public
-      notRestricted(msg.sender, to, value)
-      returns (bool success)
-    {
-      success = super.transfer(to, value);
-  }
+  	/**
+  	Overrides the parent class token transfer function to enforce restrictions.
+  	*/
+  	function transfer (address to, uint256 value)
+      		public
+      		notRestricted(msg.sender, to, value)
+      		returns (bool success)
+    	{
+      		success = super.transfer(to, value);
+  	}
 
-  /**
-  Overrides the parent class token transferFrom function to enforce restrictions.
-  */
-  function transferFrom (address from, address to, uint256 value)
-      public
-      notRestricted(from, to, value)
-      returns (bool success)
-    {
-      success = super.transferFrom(from, to, value);
-  }
+  	/**
+  	Overrides the parent class token transferFrom function to enforce restrictions.
+  	*/
+  	function transferFrom (address from, address to, uint256 value)
+      		public
+      		notRestricted(from, to, value)
+      		returns (bool success)
+    	{
+      		success = super.transferFrom(from, to, value);
+  	}
 
 	/**
 	 * @notice Withdraws all available funds for a token holder
 	 */
 	function withdrawFunds() 
-		  external 
-	  {
-		  uint256 withdrawableFunds = _prepareWithdraw();
+		external 
+	{
+		uint256 withdrawableFunds = _prepareWithdraw();
 
-		  require(fundsToken.transfer(msg.sender, withdrawableFunds), "FDT_ERC20Extension.withdrawFunds: TRANSFER_FAILED");
+		require(fundsToken.transfer(msg.sender, withdrawableFunds), "FDT_ERC20Extension.withdrawFunds: TRANSFER_FAILED");
 
-		  _updateFundsTokenBalance();
+		_updateFundsTokenBalance();
 	}
 
 	/**
@@ -1275,11 +1275,11 @@ contract SimpleRestrictedFDT is FundsDistributionToken, ERC1404, Whitelistable, 
 	 * @return A int256 representing the difference of the new and previous funds token balance
 	 */
 	function _updateFundsTokenBalance() internal returns (int256) {
-		  uint256 prevFundsTokenBalance = fundsTokenBalance;
+		uint256 prevFundsTokenBalance = fundsTokenBalance;
 
-		  fundsTokenBalance = fundsToken.balanceOf(address(this));
+		fundsTokenBalance = fundsToken.balanceOf(address(this));
 
-		  return int256(fundsTokenBalance).sub(int256(prevFundsTokenBalance));
+		return int256(fundsTokenBalance).sub(int256(prevFundsTokenBalance));
 	}
 
 	/**
@@ -1288,10 +1288,10 @@ contract SimpleRestrictedFDT is FundsDistributionToken, ERC1404, Whitelistable, 
 	 * funds token balance and increments the total received funds (cumulative) by delta by calling _registerFunds()
 	 */
 	function updateFundsReceived() external {
-		  int256 newFunds = _updateFundsTokenBalance();
+		int256 newFunds = _updateFundsTokenBalance();
 
-		  if (newFunds > 0) {
-			_distributeFunds(newFunds.toUint256Safe());
-	}
+		if (newFunds > 0) {
+		_distributeFunds(newFunds.toUint256Safe());
+		}
 	}
 }
