@@ -1301,7 +1301,7 @@ contract SimpleRestrictedFDTFactory {
     event Deployed(address indexed SRFDT, address indexed owner);
     
     function newSRFDT(
-        string memory name, 
+       		string memory name, 
 		string memory symbol,
 		IERC20 _fundsToken,
 		address[] memory initialOwner,
