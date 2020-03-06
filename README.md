@@ -1,7 +1,7 @@
 # Simple-Restricted-FDT
 Simple Restricted Funds Distribution Token (ERC-1404 + ERC-2222)
 
-[Mainnet Factory Deployment 🏭](https://etherscan.io/address/0xe042c280dee8a5a39269a849d00b602a1985a185#code)
+[Mainnet Factory Deployment 🏭](https://etherscan.io/address/0x231544beb75c4bd72333b38252794688922d1904#writeContract)
 
 # How to use whitelisting
 
