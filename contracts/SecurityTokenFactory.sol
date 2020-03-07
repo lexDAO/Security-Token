@@ -210,6 +210,32 @@ library SafeMathInt {
   }
 }
 
+/*
+ * @dev Provides information about the current execution context, including the
+ * sender of the transaction and its data. While these are generally available
+ * via msg.sender and msg.data, they should not be accessed in such a direct
+ * manner, since when dealing with GSN meta-transactions the account sending and
+ * paying for execution may not be the actual sender (as far as an application
+ * is concerned).
+ *
+ * This contract is only required for intermediate, library-like contracts.
+ */
+contract Context {
+    // Empty internal constructor, to prevent people from mistakenly deploying
+    // an instance of this contract, which should be used via inheritance.
+    constructor () internal { }
+    // solhint-disable-previous-line no-empty-blocks
+
+    function _msgSender() internal view returns (address payable) {
+        return msg.sender;
+    }
+
+    function _msgData() internal view returns (bytes memory) {
+        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+        return msg.data;
+    }
+}
+
 /**
  * @title Roles
  * @dev Library for managing addresses assigned to a Role.
@@ -278,32 +304,6 @@ contract MinterRole {
     function _removeMinter(address account) internal {
         _minters.remove(account);
         emit MinterRemoved(account);
-    }
-}
-
-/*
- * @dev Provides information about the current execution context, including the
- * sender of the transaction and its data. While these are generally available
- * via msg.sender and msg.data, they should not be accessed in such a direct
- * manner, since when dealing with GSN meta-transactions the account sending and
- * paying for execution may not be the actual sender (as far as an application
- * is concerned).
- *
- * This contract is only required for intermediate, library-like contracts.
- */
-contract Context {
-    // Empty internal constructor, to prevent people from mistakenly deploying
-    // an instance of this contract, which should be used via inheritance.
-    constructor () internal { }
-    // solhint-disable-previous-line no-empty-blocks
-
-    function _msgSender() internal view returns (address payable) {
-        return msg.sender;
-    }
-
-    function _msgData() internal view returns (bytes memory) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
-        return msg.data;
     }
 }
 
@@ -471,7 +471,7 @@ Any address can only be a member of one whitelist at a time.
  */
 contract Whitelistable is Administratable {
     /**
-    Sets an address's white list ID.  Only administrators should be allowed to update this.
+    Sets an address's whitelist ID.  Only administrators should be allowed to update this.
     If an address is on an existing whitelist, it will just get updated to the new value (removed from previous).
      */
     function addToWhitelist(address[] memory addressToAdd, uint8 whitelist) public onlyAdministrator {
@@ -479,10 +479,10 @@ contract Whitelistable is Administratable {
         // Verify the whitelist is valid
         require(whitelist != NO_WHITELIST, "Invalid whitelist ID supplied");
 
-        // Save off the previous white list
+        // Save off the previous whitelist
         uint8 previousWhitelist = addressWhitelists[addressToAdd[i]];
 
-        // Set the address's white list ID
+        // Set the address's whitelist ID
         addressWhitelists[addressToAdd[i]] = whitelist;        
 
         // If the previous whitelist existed then we want to indicate it has been removed
@@ -497,14 +497,14 @@ contract Whitelistable is Administratable {
     }
 
     /**
-    Clears out an address's white list ID.  Only administrators should be allowed to update this.
+    Clears out an address's whitelist ID.  Only administrators should be allowed to update this.
      */
     function removeFromWhitelist(address[] memory addressToRemove) public onlyAdministrator {
         for (uint256 i = 0; i < addressToRemove.length; i++) {
-        // Save off the previous white list
+        // Save off the previous whitelist
         uint8 previousWhitelist = addressWhitelists[addressToRemove[i]];
 
-        // Zero out the previous white list
+        // Zero out the previous whitelist
         addressWhitelists[addressToRemove[i]] = NO_WHITELIST;
 
         // Emit the event for tracking
@@ -544,15 +544,15 @@ contract Whitelistable is Administratable {
     }
 
     /**
-    Determine if the a sender is allowed to send to the receiver.
-    The source whitelist must be enabled to send to the whitelist where the receive exists.
+    Determine if the sender is allowed to send to the receiver.
+    The source whitelist must be enabled to send to the whitelist where the receiver exists.
      */
     function checkWhitelistAllowed(address sender, address receiver) public view returns (bool) {
-        // First get each address white list
+        // First get each address whitelist
         uint8 senderWhiteList = addressWhitelists[sender];
         uint8 receiverWhiteList = addressWhitelists[receiver];
 
-        // If either address is not on a white list then the check should fail
+        // If either address is not on a whitelist then the check should fail
         if(senderWhiteList == NO_WHITELIST || receiverWhiteList == NO_WHITELIST){
             return false;
         }
@@ -919,7 +919,7 @@ contract ERC20Detailed is IERC20 {
  *
  * At construction, the deployer of the contract is the only minter.
  */
-contract ERC20Mintable is ERC20, MinterRole {
+contract ERC20Mintable is MinterRole, ERC20 {
     /**
      * @dev See `ERC20._mint`.
      *
@@ -1116,15 +1116,15 @@ contract FundsDistributionToken is ERC20Detailed, ERC20Mintable, IFundsDistribut
 }
 
 contract SecurityToken is Restrictable, Whitelistable, ERC1404, FundsDistributionToken {
-    // presented by OpenEsquire || lexDAO - Hybrid ERC-1404_2222
+    // presented by OpenEsquire || lexDAO ~ Hybrid ERC-1404_2222 ~ Use at own risk!
 	using SafeMathUint for uint256;
 	using SafeMathInt for int256;
 	
-	 // ERC1404 Error codes and messages
+	// ERC1404 Error codes and messages
     uint8 public constant SUCCESS_CODE = 0;
     uint8 public constant FAILURE_NON_WHITELIST = 1;
     string public constant SUCCESS_MESSAGE = "SUCCESS";
-    string public constant FAILURE_NON_WHITELIST_MESSAGE = "The transfer was restricted due to white list configuration.";
+    string public constant FAILURE_NON_WHITELIST_MESSAGE = "The transfer was restricted due to whitelist configuration.";
     string public constant UNKNOWN_ERROR = "Unknown Error Code";
 
 	// token in which the funds can be sent to the FundsDistributionToken
@@ -1144,7 +1144,7 @@ contract SecurityToken is Restrictable, Whitelistable, ERC1404, FundsDistributio
 		uint8 decimals,
 		IERC20 _fundsToken,
         address[] memory ownership,
-        uint256[] memory initialAmount
+        uint256[] memory issuance
 	) 
 		public 
 		ERC20Detailed(name, symbol, decimals)
@@ -1152,7 +1152,7 @@ contract SecurityToken is Restrictable, Whitelistable, ERC1404, FundsDistributio
 		require(address(_fundsToken) != address(0), "SecurityToken: INVALID_FUNDS_TOKEN_ADDRESS");
 
         for (uint256 i = 0; i < ownership.length; i++) {
-		    _mint(ownership[i], initialAmount[i]);
+		    _mint(ownership[i], issuance[i]);
         }
 
 		fundsToken = _fundsToken;
@@ -1177,7 +1177,7 @@ contract SecurityToken is Restrictable, Whitelistable, ERC1404, FundsDistributio
             return SUCCESS_CODE;
         }
 
-        // If the contract owner is transferring, then ignore reistrictions        
+        // If the contract owner is transferring, then ignore restrictions        
         if(from == owner()) {
             return SUCCESS_CODE;
         }
@@ -1286,7 +1286,7 @@ contract SecurityToken is Restrictable, Whitelistable, ERC1404, FundsDistributio
 }
 
 contract SecurityTokenFactory {
-    // presented by OpenEsquire || lexDAO - Hybrid ERC-1404_2222 Factory
+    // presented by OpenEsquire || lexDAO ~ Hybrid ERC-1404_2222 Factory ~ Use at own risk!
     
     // Factory stamp message
     string public stamp;
@@ -1308,7 +1308,7 @@ contract SecurityTokenFactory {
 		uint8 decimals,
 		IERC20 _fundsToken,
 		address[] memory ownership,
-		uint256[] memory initialAmount) public {
+		uint256[] memory issuance) public {
        
         ST = new SecurityToken(
             name, 
@@ -1316,7 +1316,7 @@ contract SecurityTokenFactory {
             decimals,
             _fundsToken,
             ownership,
-            initialAmount);
+            issuance);
         
         tokens.push(address(ST));
         
