@@ -1,4 +1,4 @@
-# Simple-Restricted-FDT
+# Security Token Codebase
 Simple Restricted Funds Distribution Token (ERC-1404 + ERC-2222)
 
 [Mainnet Factory Deployment 🏭](https://etherscan.io/dapp/0x53f0d72c8932f78f50d643cc30a815f69ebafc20#writeContract)
