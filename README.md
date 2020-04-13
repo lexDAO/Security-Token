@@ -1,7 +1,7 @@
 # Security Token Codebase
 Simple Restricted Funds Distribution Token (ERC-1404 + ERC-2222)
 
-[Mainnet Factory Deployment 🏭](https://etherscan.io/dapp/0x70083fa820ea8d72a0d192caf75e7db8aa2571a5#writeContract)
+[Mainnet Factory Deployment 🏭](https://etherscan.io/dapp/0xD71fB481c6E67aD2898E47fd63Ed107923B21cDe#writeContract)
 
 # How to use whitelisting
 
