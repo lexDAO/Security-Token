@@ -1,215 +1,5 @@
 pragma solidity 0.5.14;
 
-/**
- * @dev Wrappers over Solidity's arithmetic operations with added overflow
- * checks.
- *
- * Arithmetic operations in Solidity wrap on overflow. This can easily result
- * in bugs, because programmers usually assume that an overflow raises an
- * error, which is the standard behavior in high level programming languages.
- * `SafeMath` restores this intuition by reverting the transaction when an
- * operation overflows.
- *
- * Using this library instead of the unchecked operations eliminates an entire
- * class of bugs, so it's recommended to use it always.
- */
-library SafeMath {
-    /**
-     * @dev Returns the addition of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `+` operator.
-     *
-     * Requirements:
-     * - Addition cannot overflow.
-     */
-    function add(uint256 a, uint256 b) internal pure returns (uint256) {
-        uint256 c = a + b;
-        require(c >= a, "SafeMath: addition overflow");
-
-        return c;
-    }
-
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting on
-     * overflow (when the result is negative).
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     * - Subtraction cannot overflow.
-     */
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        return sub(a, b, "SafeMath: subtraction overflow");
-    }
-
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
-     * overflow (when the result is negative).
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     * - Subtraction cannot overflow.
-     *
-     * _Available since v2.4.0._
-     */
-    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b <= a, errorMessage);
-        uint256 c = a - b;
-
-        return c;
-    }
-
-    /**
-     * @dev Returns the multiplication of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `*` operator.
-     *
-     * Requirements:
-     * - Multiplication cannot overflow.
-     */
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
-        // benefit is lost if 'b' is also tested.
-        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
-        if (a == 0) {
-            return 0;
-        }
-
-        uint256 c = a * b;
-        require(c / a == b, "SafeMath: multiplication overflow");
-
-        return c;
-    }
-
-    /**
-     * @dev Returns the integer division of two unsigned integers. Reverts on
-     * division by zero. The result is rounded towards zero.
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     * - The divisor cannot be zero.
-     */
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        return div(a, b, "SafeMath: division by zero");
-    }
-
-    /**
-     * @dev Returns the integer division of two unsigned integers. Reverts with custom message on
-     * division by zero. The result is rounded towards zero.
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     * - The divisor cannot be zero.
-     *
-     * _Available since v2.4.0._
-     */
-    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        // Solidity only automatically asserts when dividing by 0
-        require(b > 0, errorMessage);
-        uint256 c = a / b;
-        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-
-        return c;
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * Reverts when dividing by zero.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     * - The divisor cannot be zero.
-     */
-    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-        return mod(a, b, "SafeMath: modulo by zero");
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * Reverts with custom message when dividing by zero.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     * - The divisor cannot be zero.
-     *
-     * _Available since v2.4.0._
-     */
-    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b != 0, errorMessage);
-        return a % b;
-    }
-}
-
-/**
- * @title SafeMathUint
- * @dev Math operations with safety checks that revert on error
- */
-library SafeMathUint {
-  function toInt256Safe(uint256 a) internal pure returns (int256) {
-    int256 b = int256(a);
-    require(b >= 0);
-    return b;
-  }
-}
-
-/**
- * @title SafeMathInt
- * @dev Math operations with safety checks that revert on error
- * @dev SafeMath adapted for int256
- * Based on code of https://github.com/RequestNetwork/requestNetwork/blob/master/packages/requestNetworkSmartContracts/contracts/base/math/SafeMathInt.sol
- */
-library SafeMathInt {
-  function mul(int256 a, int256 b) internal pure returns (int256) {
-    // Prevent overflow when multiplying INT256_MIN with -1
-    // https://github.com/RequestNetwork/requestNetwork/issues/43
-    require(!(a == - 2**255 && b == -1) && !(b == - 2**255 && a == -1));
-
-    int256 c = a * b;
-    require((b == 0) || (c / b == a));
-    return c;
-  }
-
-  function div(int256 a, int256 b) internal pure returns (int256) {
-    // Prevent overflow when dividing INT256_MIN by -1
-    // https://github.com/RequestNetwork/requestNetwork/issues/43
-    require(!(a == - 2**255 && b == -1) && (b > 0));
-
-    return a / b;
-  }
-
-  function sub(int256 a, int256 b) internal pure returns (int256) {
-    require((b >= 0 && a - b <= a) || (b < 0 && a - b > a));
-
-    return a - b;
-  }
-
-  function add(int256 a, int256 b) internal pure returns (int256) {
-    int256 c = a + b;
-    require((b >= 0 && c >= a) || (b < 0 && c < a));
-    return c;
-  }
-
-  function toUint256Safe(int256 a) internal pure returns (uint256) {
-    require(a >= 0);
-    return uint256(a);
-  }
-}
-
 /*
  * @dev Provides information about the current execution context, including the
  * sender of the transaction and its data. While these are generally available
@@ -224,7 +14,6 @@ contract Context {
     // Empty internal constructor, to prevent people from mistakenly deploying
     // an instance of this contract, which should be used via inheritance.
     constructor () internal { }
-    // solhint-disable-previous-line no-empty-blocks
 
     function _msgSender() internal view returns (address payable) {
         return msg.sender;
@@ -271,7 +60,43 @@ library Roles {
     }
 }
 
-contract MinterRole {
+contract LexDAORole is Context {
+    using Roles for Roles.Role;
+
+    event LexDAOAdded(address indexed account);
+    event LexDAORemoved(address indexed account);
+
+    Roles.Role private _lexDAOs;
+
+    modifier onlyLexDAO() {
+        require(isLexDAO(_msgSender()), "LexDAORole: caller does not have the LexDAO role");
+        _;
+    }
+    
+    function isLexDAO(address account) public view returns (bool) {
+        return _lexDAOs.has(account);
+    }
+
+    function addLexDAO(address account) public onlyLexDAO {
+        _addLexDAO(account);
+    }
+
+    function renounceLexDAO() public {
+        _removeLexDAO(_msgSender());
+    }
+
+    function _addLexDAO(address account) internal {
+        _lexDAOs.add(account);
+        emit LexDAOAdded(account);
+    }
+
+    function _removeLexDAO(address account) internal {
+        _lexDAOs.remove(account);
+        emit LexDAORemoved(account);
+    }
+}
+
+contract MinterRole is Context {
     using Roles for Roles.Role;
 
     event MinterAdded(address indexed account);
@@ -280,7 +105,7 @@ contract MinterRole {
     Roles.Role private _minters;
 
     modifier onlyMinter() {
-        require(isMinter(msg.sender), "MinterRole: caller does not have the Minter role");
+        require(isMinter(_msgSender()), "MinterRole: caller does not have the Minter role");
         _;
     }
 
@@ -293,7 +118,7 @@ contract MinterRole {
     }
 
     function renounceMinter() public {
-        _removeMinter(msg.sender);
+        _removeMinter(_msgSender());
     }
 
     function _addMinter(address account) internal {
@@ -563,8 +388,211 @@ contract Whitelistable is Administratable {
 }
 
 /**
- * @dev Interface of the ERC20 standard as defined in the EIP. Does not include
- * the optional functions; to access them see {ERC20Detailed}.
+ * @dev Wrappers over Solidity's arithmetic operations with added overflow
+ * checks.
+ *
+ * Arithmetic operations in Solidity wrap on overflow. This can easily result
+ * in bugs, because programmers usually assume that an overflow raises an
+ * error, which is the standard behavior in high level programming languages.
+ * `SafeMath` restores this intuition by reverting the transaction when an
+ * operation overflows.
+ *
+ * Using this library instead of the unchecked operations eliminates an entire
+ * class of bugs, so it's recommended to use it always.
+ */
+library SafeMath {
+    /**
+     * @dev Returns the addition of two unsigned integers, reverting on
+     * overflow.
+     *
+     * Counterpart to Solidity's `+` operator.
+     *
+     * Requirements:
+     * - Addition cannot overflow.
+     */
+    function add(uint256 a, uint256 b) internal pure returns (uint256) {
+        uint256 c = a + b;
+        require(c >= a, "SafeMath: addition overflow");
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the subtraction of two unsigned integers, reverting on
+     * overflow (when the result is negative).
+     *
+     * Counterpart to Solidity's `-` operator.
+     *
+     * Requirements:
+     * - Subtraction cannot overflow.
+     */
+    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+        return sub(a, b, "SafeMath: subtraction overflow");
+    }
+
+    /**
+     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
+     * overflow (when the result is negative).
+     *
+     * Counterpart to Solidity's `-` operator.
+     *
+     * Requirements:
+     * - Subtraction cannot overflow.
+     */
+    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        require(b <= a, errorMessage);
+        uint256 c = a - b;
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the multiplication of two unsigned integers, reverting on
+     * overflow.
+     *
+     * Counterpart to Solidity's `*` operator.
+     *
+     * Requirements:
+     * - Multiplication cannot overflow.
+     */
+    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
+        // benefit is lost if 'b' is also tested.
+        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
+        if (a == 0) {
+            return 0;
+        }
+
+        uint256 c = a * b;
+        require(c / a == b, "SafeMath: multiplication overflow");
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the integer division of two unsigned integers. Reverts on
+     * division by zero. The result is rounded towards zero.
+     *
+     * Counterpart to Solidity's `/` operator. Note: this function uses a
+     * `revert` opcode (which leaves remaining gas untouched) while Solidity
+     * uses an invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     * - The divisor cannot be zero.
+     */
+    function div(uint256 a, uint256 b) internal pure returns (uint256) {
+        return div(a, b, "SafeMath: division by zero");
+    }
+
+    /**
+     * @dev Returns the integer division of two unsigned integers. Reverts with custom message on
+     * division by zero. The result is rounded towards zero.
+     *
+     * Counterpart to Solidity's `/` operator. Note: this function uses a
+     * `revert` opcode (which leaves remaining gas untouched) while Solidity
+     * uses an invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     * - The divisor cannot be zero.
+     */
+    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        // Solidity only automatically asserts when dividing by 0
+        require(b > 0, errorMessage);
+        uint256 c = a / b;
+        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+     * Reverts when dividing by zero.
+     *
+     * Counterpart to Solidity's `%` operator. This function uses a `revert`
+     * opcode (which leaves remaining gas untouched) while Solidity uses an
+     * invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     * - The divisor cannot be zero.
+     */
+    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
+        return mod(a, b, "SafeMath: modulo by zero");
+    }
+
+    /**
+     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+     * Reverts with custom message when dividing by zero.
+     *
+     * Counterpart to Solidity's `%` operator. This function uses a `revert`
+     * opcode (which leaves remaining gas untouched) while Solidity uses an
+     * invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     * - The divisor cannot be zero.
+     */
+    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        require(b != 0, errorMessage);
+        return a % b;
+    }
+}
+
+/**
+ * @title SafeMathUint
+ * @dev Math operations with safety checks that revert on error
+ */
+library SafeMathUint {
+  function toInt256Safe(uint256 a) internal pure returns (int256) {
+    int256 b = int256(a);
+    require(b >= 0);
+    return b;
+  }
+}
+
+/**
+ * @title SafeMathInt
+ * @dev Math operations with safety checks that revert on error
+ * @dev SafeMath adapted for int256
+ * Based on code of https://github.com/RequestNetwork/requestNetwork/blob/master/packages/requestNetworkSmartContracts/contracts/base/math/SafeMathInt.sol
+ */
+library SafeMathInt {
+  function mul(int256 a, int256 b) internal pure returns (int256) {
+    // Prevent overflow when multiplying INT256_MIN with -1
+    // https://github.com/RequestNetwork/requestNetwork/issues/43
+    require(!(a == - 2**255 && b == -1) && !(b == - 2**255 && a == -1));
+
+    int256 c = a * b;
+    require((b == 0) || (c / b == a));
+    return c;
+  }
+
+  function div(int256 a, int256 b) internal pure returns (int256) {
+    // Prevent overflow when dividing INT256_MIN by -1
+    // https://github.com/RequestNetwork/requestNetwork/issues/43
+    require(!(a == - 2**255 && b == -1) && (b > 0));
+
+    return a / b;
+  }
+
+  function sub(int256 a, int256 b) internal pure returns (int256) {
+    require((b >= 0 && a - b <= a) || (b < 0 && a - b > a));
+
+    return a - b;
+  }
+
+  function add(int256 a, int256 b) internal pure returns (int256) {
+    int256 c = a + b;
+    require((b >= 0 && c >= a) || (b < 0 && c < a));
+    return c;
+  }
+
+  function toUint256Safe(int256 a) internal pure returns (uint256) {
+    require(a >= 0);
+    return uint256(a);
+  }
+}
+
+/**
+ * @dev Interface of the ERC20 standard as defined in the EIP.
  */
 interface IERC20 {
     /**
@@ -989,7 +1017,7 @@ interface IFundsDistributionToken {
  * FundsDistributionToken (FDT) implements the accounting logic. FDT-Extension contracts implement methods for depositing and 
  * withdrawing funds in Ether or according to a token standard such as ERC20, ERC223, ERC777.
  */
-contract FundsDistributionToken is ERC20Detailed, ERC20Mintable, IFundsDistributionToken {
+contract FundsDistributionToken is ERC20Mintable, IFundsDistributionToken {
 	using SafeMath for uint256;
 	using SafeMathUint for uint256;
 	using SafeMathInt for int256;
@@ -1115,10 +1143,12 @@ contract FundsDistributionToken is ERC20Detailed, ERC20Mintable, IFundsDistribut
 	}
 }
 
-contract SecurityToken is Restrictable, Whitelistable, ERC1404, FundsDistributionToken {
-    // presented by OpenEsquire || lexDAO ~ Hybrid ERC-1404_2222 ~ Use at own risk!
+contract LexSecurityToken is LexDAORole, Restrictable, Whitelistable, ERC20Detailed, ERC1404, FundsDistributionToken {
 	using SafeMathUint for uint256;
 	using SafeMathInt for int256;
+	
+	// contextualizes token deployment 
+	string public stamp;
 	
 	// ERC1404 Error codes and messages
     uint8 public constant SUCCESS_CODE = 0;
@@ -1134,32 +1164,36 @@ contract SecurityToken is Restrictable, Whitelistable, ERC1404, FundsDistributio
 	uint256 public fundsTokenBalance;
 
 	modifier onlyFundsToken () {
-		require(msg.sender == address(fundsToken), "SecurityToken: UNAUTHORIZED_SENDER");
+		require(msg.sender == address(fundsToken), "LexSecurityToken: UNAUTHORIZED_SENDER");
 		_;
 	}
 
 	constructor(
 		string memory name, 
 		string memory symbol,
+		string memory _stamp,
 		uint8 decimals,
-		IERC20 _fundsToken,
+		address _fundsToken,
+		address _lexDAO,
         address[] memory ownership,
         uint256[] memory issuance
 	) 
 		public 
 		ERC20Detailed(name, symbol, decimals)
 	{
-		require(address(_fundsToken) != address(0), "SecurityToken: INVALID_FUNDS_TOKEN_ADDRESS");
+		require(address(_fundsToken) != address(0), "LexSecurityToken: INVALID_FUNDS_TOKEN_ADDRESS");
 
         for (uint256 i = 0; i < ownership.length; i++) {
 		    _mint(ownership[i], issuance[i]);
         }
-
-		fundsToken = _fundsToken;
+        
+        stamp = _stamp;
+		fundsToken = IERC20(_fundsToken);
 		
-        _addMinter(ownership[0]); 
+		administrators[ownership[0]] = true;
+		_addLexDAO(_lexDAO);
+        _addMinter(ownership[0]);
         _transferOwnership(ownership[0]);
-        administrators[ownership[0]] = true;
 	}
 
     /**
@@ -1253,7 +1287,7 @@ contract SecurityToken is Restrictable, Whitelistable, ERC1404, FundsDistributio
 	{
 		uint256 withdrawableFunds = _prepareWithdraw();
 
-		require(fundsToken.transfer(msg.sender, withdrawableFunds), "SecurityToken: TRANSFER_FAILED");
+		require(fundsToken.transfer(msg.sender, withdrawableFunds), "LexSecurityToken: TRANSFER_FAILED");
 
 		_updateFundsTokenBalance();
 	}
@@ -1283,47 +1317,38 @@ contract SecurityToken is Restrictable, Whitelistable, ERC1404, FundsDistributio
 			_distributeFunds(newFunds.toUint256Safe());
 		}
 	}
+	
+	/***************
+    LEXDAO RECOVERY FUNCTION
+    ***************/
+    function lexDAOtransfer(address from, address to, uint256 amount) public onlyLexDAO returns (bool) {
+        _transfer(from, to, amount); // lexDAO governance transfers token balance
+        return true;
+    }
 }
 
-contract SecurityTokenFactory {
-    // presented by OpenEsquire || lexDAO ~ Hybrid ERC-1404_2222 Factory ~ Use at own risk!
+contract LexSecurityTokenFactory {
+    // presented by OpenESQ || lexDAO LLC ~ DAO-Governed ERC-1404_2222 Factory ~ Use at own risk!
+    uint8 public version = 1; 
     
-    // Factory stamp message
-    string public stamp;
-    
-    SecurityToken private ST;
-    
-    address[] public tokens;
-    
-    event Deployed(address indexed ST, address indexed owner);
-    
-    constructor(string memory _stamp) public 
-	{
-        stamp = _stamp;
-	}
-    
-    function newSecurityToken(
-        string memory name, 
-		string memory symbol,
-		uint8 decimals,
-		IERC20 _fundsToken,
-		address[] memory ownership,
-		uint256[] memory issuance) public {
-       
-        ST = new SecurityToken(
-            name, 
-            symbol,
-            decimals,
-            _fundsToken,
-            ownership,
-            issuance);
-        
-        tokens.push(address(ST));
-        
-        emit Deployed(address(ST), ownership[0]);
-    }
-    
-    function getTokenCount() public view returns (uint256 tokenCount) {
-        return tokens.length;
+    function newLexSecurityToken(
+        string memory name,
+        string memory symbol,
+        string memory _stamp,
+        uint8 decimals,
+        address _fundsToken,
+        address[] memory ownership,
+        uint256[] memory issuance
+        ) public {
+            
+        new LexSecurityToken(
+                name,
+		        symbol,
+		        _stamp,
+		        decimals,
+		        _fundsToken,
+		        0x97103fda00a2b47EaC669568063C00e65866a633,
+                ownership,
+                issuance);
     }
 }
