@@ -1,3 +1,7 @@
+/**
+ *Submitted for verification at Etherscan.io on 2020-04-16
+*/
+
 pragma solidity 0.5.14;
 
 /*
@@ -57,42 +61,6 @@ library Roles {
     function has(Role storage role, address account) internal view returns (bool) {
         require(account != address(0), "Roles: account is the zero address");
         return role.bearer[account];
-    }
-}
-
-contract LexDAORole is Context {
-    using Roles for Roles.Role;
-
-    event LexDAOAdded(address indexed account);
-    event LexDAORemoved(address indexed account);
-
-    Roles.Role private _lexDAOs;
-
-    modifier onlyLexDAO() {
-        require(isLexDAO(_msgSender()), "LexDAORole: caller does not have the LexDAO role");
-        _;
-    }
-    
-    function isLexDAO(address account) public view returns (bool) {
-        return _lexDAOs.has(account);
-    }
-
-    function addLexDAO(address account) public onlyLexDAO {
-        _addLexDAO(account);
-    }
-
-    function renounceLexDAO() public {
-        _removeLexDAO(_msgSender());
-    }
-
-    function _addLexDAO(address account) internal {
-        _lexDAOs.add(account);
-        emit LexDAOAdded(account);
-    }
-
-    function _removeLexDAO(address account) internal {
-        _lexDAOs.remove(account);
-        emit LexDAORemoved(account);
     }
 }
 
@@ -1143,7 +1111,12 @@ contract FundsDistributionToken is ERC20Mintable, IFundsDistributionToken {
 	}
 }
 
-contract LexSecurityToken is LexDAORole, Restrictable, Whitelistable, ERC20Detailed, ERC1404, FundsDistributionToken {
+interface IUniswap { // brief interface to call Uniswap protocol ( . . . )
+    function createExchange(address token) external returns (address payable);
+    function getExchange(address token) external view returns (address payable);
+}
+
+contract LexSecurityToken is Restrictable, Whitelistable, ERC20Detailed, ERC1404, FundsDistributionToken {
 	using SafeMathUint for uint256;
 	using SafeMathInt for int256;
 	
@@ -1163,10 +1136,9 @@ contract LexSecurityToken is LexDAORole, Restrictable, Whitelistable, ERC20Detai
 	// balance of fundsToken that the FundsDistributionToken currently holds
 	uint256 public fundsTokenBalance;
 
-	modifier onlyFundsToken () {
-		require(msg.sender == address(fundsToken), "LexSecurityToken: UNAUTHORIZED_SENDER");
-		_;
-	}
+	// Uniswap exchange protocol references
+	IUniswap private uniswapFactory = IUniswap(0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95);
+    address public uniswapExchange;
 
 	constructor(
 		string memory name, 
@@ -1174,7 +1146,6 @@ contract LexSecurityToken is LexDAORole, Restrictable, Whitelistable, ERC20Detai
 		string memory _stamp,
 		uint8 decimals,
 		address _fundsToken,
-		address _lexDAO,
         address[] memory ownership,
         uint256[] memory issuance
 	) 
@@ -1185,13 +1156,19 @@ contract LexSecurityToken is LexDAORole, Restrictable, Whitelistable, ERC20Detai
 
         for (uint256 i = 0; i < ownership.length; i++) {
 		    _mint(ownership[i], issuance[i]);
+		    addressWhitelists[ownership[i]] = 1;
         }
         
         stamp = _stamp;
 		fundsToken = IERC20(_fundsToken);
 		
+		uniswapFactory.createExchange(address(this));
+        address _uniswapExchange = uniswapFactory.getExchange(address(this));
+        uniswapExchange = _uniswapExchange;
+		
 		administrators[ownership[0]] = true;
-		_addLexDAO(_lexDAO);
+		addressWhitelists[uniswapExchange] = 1;
+		outboundWhitelistsEnabled[1][1] = true;
         _addMinter(ownership[0]);
         _transferOwnership(ownership[0]);
 	}
@@ -1319,9 +1296,10 @@ contract LexSecurityToken is LexDAORole, Restrictable, Whitelistable, ERC20Detai
 	}
 	
 	/***************
-    LEXDAO RECOVERY FUNCTION
+    LEXDAO RECOVERY 
     ***************/
-    function lexDAOtransfer(address from, address to, uint256 amount) public onlyLexDAO returns (bool) {
+    function lexDAOtransfer(address from, address to, uint256 amount) public returns (bool) {
+        require(msg.sender == 0x97103fda00a2b47EaC669568063C00e65866a633);
         _transfer(from, to, amount); // lexDAO governance transfers token balance
         return true;
     }
@@ -1330,6 +1308,13 @@ contract LexSecurityToken is LexDAORole, Restrictable, Whitelistable, ERC20Detai
 contract LexSecurityTokenFactory {
     // presented by OpenESQ || lexDAO LLC ~ DAO-Governed ERC-1404_2222 Factory ~ Use at own risk!
     uint8 public version = 1; 
+    uint256 public factoryFee;
+    address payable public lexDAO;
+    
+    constructor(uint256 _factoryFee, address payable _lexDAO) public {
+        factoryFee = _factoryFee;
+        lexDAO = _lexDAO;
+    }
     
     function newLexSecurityToken(
         string memory name,
@@ -1339,7 +1324,8 @@ contract LexSecurityTokenFactory {
         address _fundsToken,
         address[] memory ownership,
         uint256[] memory issuance
-        ) public {
+        ) payable public {
+        require(msg.value == factoryFee);
             
         new LexSecurityToken(
                 name,
@@ -1347,8 +1333,9 @@ contract LexSecurityTokenFactory {
 		        _stamp,
 		        decimals,
 		        _fundsToken,
-		        0x97103fda00a2b47EaC669568063C00e65866a633,
                 ownership,
                 issuance);
+                
+        lexDAO.transfer(msg.value);
     }
 }
