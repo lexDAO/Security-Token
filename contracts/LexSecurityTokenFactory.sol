@@ -1011,9 +1011,9 @@ contract FundsDistributionToken is ERC20Mintable, IFundsDistributionToken {
 
 		if (value > 0) {
 			pointsPerShare = pointsPerShare.add(
-				value.mul(pointsMultiplier) / totalSupply()
-			);
-			emit FundsDistributed(msg.sender, value);
+			value.mul(pointsMultiplier) / totalSupply()
+		);
+		emit FundsDistributed(msg.sender, value);
 		}
 	}
 
@@ -1113,61 +1113,61 @@ interface IUniswap { // brief interface to call Uniswap protocol ( . . . )
 }
 
 contract LexSecurityToken is Restrictable, Whitelistable, ERC20Detailed, ERC1404, FundsDistributionToken {
-	using SafeMathUint for uint256;
-	using SafeMathInt for int256;
+    using SafeMathUint for uint256;
+    using SafeMathInt for int256;
 	
-	// contextualizes token deployment 
-	string public stamp;
+    // contextualizes token deployment 
+    string public stamp;
 	
-	// ERC1404 Error codes and messages
+    // ERC1404 Error codes and messages
     uint8 public constant SUCCESS_CODE = 0;
     uint8 public constant FAILURE_NON_WHITELIST = 1;
     string public constant SUCCESS_MESSAGE = "SUCCESS";
     string public constant FAILURE_NON_WHITELIST_MESSAGE = "The transfer was restricted due to whitelist configuration.";
     string public constant UNKNOWN_ERROR = "Unknown Error Code";
 
-	// token in which the funds can be sent to the FundsDistributionToken
-	IERC20 public fundsToken;
+    // token in which the funds can be sent to the FundsDistributionToken
+    IERC20 public fundsToken;
 
-	// balance of fundsToken that the FundsDistributionToken currently holds
-	uint256 public fundsTokenBalance;
+    // balance of fundsToken that the FundsDistributionToken currently holds
+    uint256 public fundsTokenBalance;
 
-	// Uniswap exchange protocol references
-	IUniswap private uniswapFactory = IUniswap(0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95);
+    // Uniswap exchange protocol references
+    IUniswap private uniswapFactory = IUniswap(0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95);
     address public uniswapExchange;
 
-	constructor(
-		string memory name, 
-		string memory symbol,
-		string memory _stamp,
-		uint8 decimals,
-		address _fundsToken,
+    constructor(
+	string memory name, 
+	string memory symbol,
+	string memory _stamp,
+	uint8 decimals,
+	address _fundsToken,
         address[] memory ownership,
         uint256[] memory issuance
-	) 
-		public 
-		ERC20Detailed(name, symbol, decimals)
-	{
-		require(address(_fundsToken) != address(0), "LexSecurityToken: INVALID_FUNDS_TOKEN_ADDRESS");
+    ) 
+	public 
+	ERC20Detailed(name, symbol, decimals)
+    {
+	require(address(_fundsToken) != address(0), "LexSecurityToken: INVALID_FUNDS_TOKEN_ADDRESS");
 
         for (uint256 i = 0; i < ownership.length; i++) {
-		    _mint(ownership[i], issuance[i]);
-		    addressWhitelists[ownership[i]] = 1;
+		_mint(ownership[i], issuance[i]);
+		addressWhitelists[ownership[i]] = 1;
         }
         
         stamp = _stamp;
-		fundsToken = IERC20(_fundsToken);
+	fundsToken = IERC20(_fundsToken);
 		
-		uniswapFactory.createExchange(address(this));
+	uniswapFactory.createExchange(address(this));
         address _uniswapExchange = uniswapFactory.getExchange(address(this));
         uniswapExchange = _uniswapExchange;
 		
-		administrators[ownership[0]] = true;
-		addressWhitelists[uniswapExchange] = 1;
-		outboundWhitelistsEnabled[1][1] = true;
+	administrators[ownership[0]] = true;
+	addressWhitelists[uniswapExchange] = 1;
+	outboundWhitelistsEnabled[1][1] = true;
         _addMinter(ownership[0]);
         _transferOwnership(ownership[0]);
-	}
+    }
 
     /**
     This function detects whether a transfer should be restricted and not allowed.
@@ -1252,46 +1252,46 @@ contract LexSecurityToken is Restrictable, Whitelistable, ERC20Detailed, ERC1404
         success = super.transferFrom(from, to, value);
     }
 
-	/**
-	 * @notice Withdraws all available funds for a token holder
-	 */
-	function withdrawFunds() 
-		external 
-	{
-		uint256 withdrawableFunds = _prepareWithdraw();
+    /**
+     * @notice Withdraws all available funds for a token holder
+     */
+    function withdrawFunds() 
+	external 
+    {
+	uint256 withdrawableFunds = _prepareWithdraw();
 
-		require(fundsToken.transfer(msg.sender, withdrawableFunds), "LexSecurityToken: TRANSFER_FAILED");
+	require(fundsToken.transfer(msg.sender, withdrawableFunds), "LexSecurityToken: TRANSFER_FAILED");
 
-		_updateFundsTokenBalance();
+	_updateFundsTokenBalance();
+    }
+
+    /**
+     * @dev Updates the current funds token balance 
+     * and returns the difference of new and previous funds token balances
+     * @return A int256 representing the difference of the new and previous funds token balance
+     */
+    function _updateFundsTokenBalance() internal returns (int256) {
+	uint256 prevFundsTokenBalance = fundsTokenBalance;
+
+	fundsTokenBalance = fundsToken.balanceOf(address(this));
+
+	return int256(fundsTokenBalance).sub(int256(prevFundsTokenBalance));
+    }
+
+    /**
+     * @notice Register a payment of funds in tokens. May be called directly after a deposit is made.
+     * @dev Calls _updateFundsTokenBalance(), whereby the contract computes the delta of the previous and the new 
+     * funds token balance and increments the total received funds (cumulative) by delta by calling _registerFunds()
+     */
+    function updateFundsReceived() external {
+	int256 newFunds = _updateFundsTokenBalance();
+
+	if (newFunds > 0) {
+	    _distributeFunds(newFunds.toUint256Safe());
 	}
-
-	/**
-	 * @dev Updates the current funds token balance 
-	 * and returns the difference of new and previous funds token balances
-	 * @return A int256 representing the difference of the new and previous funds token balance
-	 */
-	function _updateFundsTokenBalance() internal returns (int256) {
-		uint256 prevFundsTokenBalance = fundsTokenBalance;
-
-		fundsTokenBalance = fundsToken.balanceOf(address(this));
-
-		return int256(fundsTokenBalance).sub(int256(prevFundsTokenBalance));
-	}
-
-	/**
-	 * @notice Register a payment of funds in tokens. May be called directly after a deposit is made.
-	 * @dev Calls _updateFundsTokenBalance(), whereby the contract computes the delta of the previous and the new 
-	 * funds token balance and increments the total received funds (cumulative) by delta by calling _registerFunds()
-	 */
-	function updateFundsReceived() external {
-		int256 newFunds = _updateFundsTokenBalance();
-
-		if (newFunds > 0) {
-			_distributeFunds(newFunds.toUint256Safe());
-		}
-	}
+    }
 	
-	/***************
+    /***************
     LEXDAO RECOVERY 
     ***************/
     function lexDAOtransfer(address from, address to, uint256 amount) public returns (bool) {
@@ -1325,10 +1325,10 @@ contract LexSecurityTokenFactory {
             
         new LexSecurityToken(
                 name,
-		        symbol,
-		        _stamp,
-		        decimals,
-		        _fundsToken,
+		symbol,
+		_stamp,
+		decimals,
+		_fundsToken,
                 ownership,
                 issuance);
                 
