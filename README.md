@@ -2,6 +2,7 @@
 Simple Restricted Funds Distribution Token (ERC-1404 + ERC-2222)
 
 [Mainnet Factory Deployment 🏭](https://etherscan.io/address/0x697D15d97af389A5f7922eFECEab39A688A74A99#code)
+Fee: 0.001 ETH (input into top payable field on etherscan)
 
 # How to use whitelisting
 
